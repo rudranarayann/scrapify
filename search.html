@@ -47,12 +47,9 @@
             margin-top: 10px;
         }
         .photo-preview img {
-            max-width: 100px;
+            max-width: 200px;
             display: block;
             margin-top: 10px;
-        }
-        .photo-preview p {
-            margin: 5px 0;
         }
     </style>
 </head>
@@ -95,8 +92,8 @@
                     <textarea id="description"></textarea>
                 </div>
                 <div class="form-group">
-                    <label for="photos">Upload Photos (Max 5):</label>
-                    <input type="file" id="photos" accept="image/*" multiple onchange="previewPhotos()">
+                    <label for="photo">Upload Photo:</label>
+                    <input type="file" id="photo" accept="image/*" onchange="previewPhoto()">
                     <div class="photo-preview" id="photoPreview"></div>
                 </div>
                 <button type="button" onclick="sendRequest()">Send Request</button>
@@ -144,31 +141,18 @@
             document.getElementById('requestForm').style.display = 'block';
         }
 
-        function previewPhotos() {
-            const files = document.getElementById('photos').files;
+        function previewPhoto() {
+            const file = document.getElementById('photo').files[0];
             const preview = document.getElementById('photoPreview');
-            preview.innerHTML = '';
-
-            if (files.length > 5) {
-                alert('You can upload a maximum of 5 photos.');
-                return;
-            }
-
-            Array.from(files).forEach((file, index) => {
+            if (file) {
                 const reader = new FileReader();
                 reader.onload = function(e) {
-                    // Remove file extension
-                    const fileNameWithoutExtension = file.name.replace(/\.[^/.]+$/, "");
-
-                    const photoItem = document.createElement('div');
-                    photoItem.innerHTML = `
-                        <p>Photo ${index + 1}: ${fileNameWithoutExtension}</p>
-                        <img src="${e.target.result}" alt="Photo ${index + 1}">
-                    `;
-                    preview.appendChild(photoItem);
+                    preview.innerHTML = `<img src="${e.target.result}" alt="Photo Preview">`;
                 };
                 reader.readAsDataURL(file);
-            });
+            } else {
+                preview.innerHTML = '';
+            }
         }
 
         function sendRequest() {
@@ -176,9 +160,8 @@
             const scrapType = document.getElementById('scrapType').value;
             const quantity = document.getElementById('quantity').value;
             const description = document.getElementById('description').value;
-            const files = document.getElementById('photos').files;
 
-            if (!vendorId || !scrapType || quantity < 10 || !description || files.length === 0) {
+            if (!vendorId || !scrapType || quantity < 10 || !description) {
                 alert('Please fill in all fields with valid information.');
                 return;
             }
@@ -190,7 +173,6 @@
                 <p>Scrap Type: ${scrapType}</p>
                 <p>Quantity: ${quantity} kg</p>
                 <p>Description: ${description}</p>
-                <p>Photos Uploaded: ${files.length}</p>
             `;
             confirmationMessage.style.display = 'block';
         }
@@ -198,7 +180,7 @@
         function initialize() {
             const locationSelect = document.getElementById('userLocation');
             for (const [id, name] of Object.entries(locations)) {
-                locationSelect.innerHTML += <option value="${id}">${name}</option>;
+                locationSelect.innerHTML += `<option value="${id}">${name}</option>`;
             }
         }
 
